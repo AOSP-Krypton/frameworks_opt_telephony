@@ -507,12 +507,6 @@ public class NetworkTypeControllerTest extends TelephonyTest {
         mBundle.putInt(CarrierConfigManager.KEY_NR_ADVANCED_CAPABLE_PCO_ID_INT, 0xFF03);
         broadcastCarrierConfigs();
         processAllMessages();
-
-
-        mNetworkTypeController.sendMessage(EVENT_PCO_DATA_CHANGED,
-                new AsyncResult(null, new PcoData(cid, "", 0xff03, contents), null));
-        mNetworkTypeController.sendMessage(NetworkTypeController.EVENT_UPDATE);
-        processAllMessages();
         assertEquals("connected", getCurrentState().getName());
     }
 
@@ -553,11 +547,12 @@ public class NetworkTypeControllerTest extends TelephonyTest {
         broadcastCarrierConfigs();
         int cid = 1;
         byte[] contents = new byte[]{31, 1, 84, 0};
-        doReturn(mDataConnection).when(mDcTracker).getDataConnectionByContextId(cid);
-        doReturn(mApnSetting).when(mDataConnection).getApnSetting();
-        doReturn(true).when(mApnSetting).canHandleType(ApnSetting.TYPE_DEFAULT);
+        mNetworkTypeController.sendMessage(EVENT_DATA_CALL_LIST_CHANGED,
+                new AsyncResult(null, List.of(getDataCallResponse(cid)), null));
+        processAllMessages();
         mBundle.putInt(CarrierConfigManager.KEY_NR_ADVANCED_CAPABLE_PCO_ID_INT, 0xFF03);
         broadcastCarrierConfigs();
+        processAllMessages();
 
 
         mNetworkTypeController.sendMessage(EVENT_PCO_DATA_CHANGED,
